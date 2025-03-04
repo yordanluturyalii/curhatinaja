@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import register from "@/app/actions/register";
+import register from "@/actions/register";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 

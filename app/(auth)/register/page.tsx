@@ -1,5 +1,10 @@
 import { AuthLogo } from "@/components/auth-logo"
 import FormRegister from "../_components/form-register"
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Login'
+};
 
 const Register = () => {
     return (
