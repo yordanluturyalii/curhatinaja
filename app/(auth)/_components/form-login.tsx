@@ -34,7 +34,12 @@ const FormLogin = () => {
             });
             setIsPending(false);
         } else {
-            router.push("/dashboard");
+            toast.success("Login successful! Redirecting...", {
+                duration: 4000
+            });
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 4000);
         }
     };
 

@@ -20,9 +20,10 @@ const handler = NextAuth({
         if (user.length === 0) throw new Error("Invalid Credentials");
 
         const validPassword = await compare(credentials.password, user[0].password);
+        console.log(validPassword);
         if (!validPassword) throw new Error("Invalid Credentials");
 
-        return null;
+        return user;
       },
     })
   ],
