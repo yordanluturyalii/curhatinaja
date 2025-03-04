@@ -3,7 +3,7 @@ import FormRegister from "../_components/form-register"
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Login'
+    title: 'Register'
 };
 
 const Register = () => {
@@ -12,7 +12,7 @@ const Register = () => {
             <div className="bg-white rounded-2xl p-8 shadow-sm w-full max-w-md">
                 <div className="flex items-center gap-2 mb-2">
                     <AuthLogo />
-                    <h1 className="text-2xl font-bold">Sign up</h1>
+                    <h1 className="text-2xl font-bold">Register</h1>
                 </div>
                 <p className="text-gray-600 mb-6">Enter your details below to create your account and get started.</p>
                 <FormRegister />
