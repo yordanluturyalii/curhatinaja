@@ -3,8 +3,7 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { RegisterSchema } from "@/lib/schema";
-import { hash } from "crypto";
-// import bcrypt from "bcrypt";
+import { hash } from "bcrypt-ts";
 import { eq, or } from "drizzle-orm";
 
 type FormState = {
@@ -52,7 +51,7 @@ export default async function register(state: FormState, formData: FormData): Pr
         return { error };
     }
 
-    const hashPassword = hash('sha1', password);
+    const hashPassword = await hash(password, 10);
 
     await db.insert(users).values({ name, username, email, password: hashPassword });
 
