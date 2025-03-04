@@ -19,7 +19,7 @@ const handler = NextAuth({
 
         if (user.length === 0) throw new Error("Invalid Credentials");
 
-        const validPassword = await compare("B4c0//", user[0].password);
+        const validPassword = await compare(credentials.password, user[0].password);
         if (!validPassword) throw new Error("Invalid Credentials");
 
         return null;
