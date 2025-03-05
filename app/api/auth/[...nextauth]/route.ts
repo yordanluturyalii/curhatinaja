@@ -23,7 +23,7 @@ const handler = NextAuth({
         console.log(validPassword);
         if (!validPassword) throw new Error("Invalid Credentials");
 
-        return user;
+        return user[0];
       },
     })
   ],
