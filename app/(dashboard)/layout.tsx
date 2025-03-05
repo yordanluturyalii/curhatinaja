@@ -10,7 +10,7 @@ export default function RegisterLayout({
   children: React.ReactNode
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="bg-gradient-to-b from-purple-100 via-purple-200 to-purple-100">
       <AppSidebar />
       <SessionProvider>
         <SidebarTrigger />
