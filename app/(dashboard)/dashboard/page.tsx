@@ -1,11 +1,12 @@
 'use client';
 
-import NewChatModal from '@/components/new-chat-modal';
+import NewChatModal from '@/app/(dashboard)/_components/new-chat-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
+import VentCard from "@/app/(dashboard)/_components/vent-card";
 
 const Dashboard = () => {
     const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -20,8 +21,8 @@ const Dashboard = () => {
     return (
         <main className='md:p-10 p-4 sm:p-6 text-gray-900 w-full'>
             <div className="flex justify-between w-full">
-                <h1 className='text-2xl font-bold'>Dashboard</h1>
-                <Button className='bg-white' onClick={() => setIsOpenModal((val) => !val)}>
+                <h1 className='text-2xl font-bold text-purple-800'>Dashboard</h1>
+                <Button className='bg-purple-800 text-white cursor-pointer' onClick={() => setIsOpenModal((val) => !val)}>
                     New Session
                 </Button>
             </div>
@@ -30,13 +31,13 @@ const Dashboard = () => {
                 <TabsList className="bg-white border border-gray-200 p-1 rounded-full">
                     <TabsTrigger
                         value="recent"
-                        className="rounded-full px-6 data-[state=active]:bg-gray-900 data-[state=active]:text-white"
+                        className="rounded-full px-6 data-[state=active]:bg-purple-800 data-[state=active]:text-white"
                     >
                         Curhat Terbaru
                     </TabsTrigger>
                     <TabsTrigger
                         value="favorites"
-                        className="rounded-full px-6 data-[state=active]:bg-gray-900 data-[state=active]:text-white"
+                        className="rounded-full px-6 data-[state=active]:bg-purple-800 data-[state=active]:text-white"
                     >
                         Favorit
                     </TabsTrigger>
@@ -45,28 +46,7 @@ const Dashboard = () => {
                 <TabsContent value="recent" className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {recentChats.map((chat) => (
-                            <Card
-                                key={chat.id}
-                                className="bg-white border-gray-200 rounded-2xl hover:shadow-lg transition-shadow"
-                            >
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg font-medium">{chat.title}</CardTitle>
-                                    <p className="text-sm text-gray-500">{chat.date}</p>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex gap-2">
-                                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{chat.personality}</span>
-                                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{chat.role}</span>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full mt-4 text-gray-600 hover:text-gray-900"
-                                        onClick={() => router.push(`/chat/${chat.id}`)}
-                                    >
-                                        Lihat Detail
-                                    </Button>
-                                </CardContent>
-                            </Card>
+                            <VentCard key={chat.id} id={chat.id} title={chat.title} date={chat.date} personality={chat.personality} roles={chat.role} />
                         ))}
                     </div>
                 </TabsContent>

@@ -119,7 +119,7 @@ export default function NewChatModal({ isOpen, onClose, onStart }: NewChatModalP
         </div>
         
         <DialogFooter>
-          <Button onClick={handleStart} className="w-full bg-purple-600 hover:bg-purple-700 text-white">Start Chat</Button>
+          <Button onClick={handleStart} className="w-full bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">Start Chat</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-export default function RegisterLayout({
+export default function AuthLayout({
     children,
   }: {
     children: React.ReactNode
