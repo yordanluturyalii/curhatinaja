@@ -2,13 +2,14 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import {useState, useEffect, useRef, useActionState} from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Send, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import createChat from "@/actions/chat";
 
 interface Message {
     id: string
@@ -192,6 +193,7 @@ export default function ChatPage() {
                             onChange={(e) => setInput(e.target.value)}
                             placeholder={sessionEnded ? "Session has ended" : "Type your message..."}
                             disabled={sessionEnded}
+                            name={"message"}
                             className="flex-1 bg-[#F3F0FF] border-0 rounded-full text-gray-800 placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-purple-500 focus-visible:ring-offset-0"
                         />
                         <Button

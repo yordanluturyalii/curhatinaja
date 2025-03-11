@@ -15,7 +15,7 @@ export const users = pgTable("users", {
 export const sessions = pgTable("sessions", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     user_id: integer().references(() => users.id, {onDelete: 'cascade'}).notNull(),
-    created_ad: timestamp()
+    created_at: timestamp().notNull().defaultNow()
 });
 
 export const messages = pgTable("messages", {
@@ -23,7 +23,7 @@ export const messages = pgTable("messages", {
     session_id: integer().references(() => sessions.id, {onDelete: "cascade"}).notNull(),
     role: roleEnum().notNull(),
     message: text().notNull(),
-    created_at: timestamp()
+    created_at: timestamp().notNull().defaultNow()
 });
 
 export const results = pgTable('results', {
