@@ -3,18 +3,19 @@
 import type React from "react"
 
 import {useState, useEffect, useRef, useActionState} from "react"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { Send, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
+import {useParams, useRouter, useSearchParams} from "next/navigation"
+import {Send, Clock} from "lucide-react"
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Avatar} from "@/components/ui/avatar"
+import {Progress} from "@/components/ui/progress"
 import createChat from "@/actions/chat";
+import Markdown from "react-markdown";
 
 interface Message {
     id: string
     role: "user" | "ai"
-    content: string
+    content: string | undefined
 }
 
 export default function ChatPage() {
@@ -30,28 +31,7 @@ export default function ChatPage() {
         {
             id: "system-1",
             role: "ai",
-            content: "Hi there! I'm here to chat and help you vent. How are you feeling today?",
-        },
-        {
-            id: "user-1",
-            role: "user",
-            content: "Akhir-akhir ini aku merasa sangat tertekan dengan pekerjaan. Rasanya seperti tidak ada habisnya.",
-        },
-        {
-            id: "ai-2",
-            role: "ai",
-            content: "Aku mendengarkan. Menurutmu, apa yang membuatmu merasa tertekan di tempat kerja?",
-        },
-        {
-            id: "user-2",
-            role: "user",
-            content: "Banyak deadline yang menumpuk, atasan selalu menambah beban kerja, dan tim kami kurang komunikasi.",
-        },
-        {
-            id: "ai-3",
-            role: "ai",
-            content:
-                "Kedengarannya memang berat. Tekanan kerja bisa sangat menantang. Apakah kamu sudah mencoba berbicara dengan atasan atau tim mu tentang beban kerja ini?",
+            content: "Hai! Saya di sini untuk mengobrol dan membantumu curhat. Apa yang kamu rasakan hari ini?",
         },
     ])
 
@@ -59,6 +39,7 @@ export default function ChatPage() {
 
     const personality = searchParams.get("personality") || "santai"
     const role = searchParams.get("role") || "teman"
+    const sessionId = params.id;
 
     const formatLabel = (str: string) => {
         return str.charAt(0).toUpperCase() + str.slice(1)
@@ -68,7 +49,8 @@ export default function ChatPage() {
         if (timeLeft > 0 && !sessionEnded) {
             const timer = setTimeout(() => {
                 setTimeLeft(timeLeft - 1)
-                setProgress(((timeLeft - 1) / 300) * 100)
+                setProgress(Math.round(((timeLeft - 1) / 300) * 100))
+                console.log(progress);
             }, 1000)
             return () => clearTimeout(timer)
         } else if (timeLeft === 0 && !sessionEnded) {
@@ -88,7 +70,7 @@ export default function ChatPage() {
         return `${mins}:${secs < 10 ? "0" : ""}${secs}`
     }
 
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (sessionEnded || !input.trim()) return
 
@@ -98,11 +80,18 @@ export default function ChatPage() {
             content: input,
         }
         setMessages([...messages, newUserMessage])
+        const formData = new FormData();
+
+        formData.append("message", input);
+        formData.append("role", role);
+        formData.append("personality", personality);
+        formData.append("sessionId", sessionId);
+        const result = await createChat(formData);
 
         const newAiMessage: Message = {
             id: `ai-${messages.length + 2}`,
             role: "ai",
-            content: "Terima kasih sudah berbagi. Aku mendengarkan.",
+            content: result.data?.message,
         }
 
         setTimeout(() => {
@@ -114,7 +103,8 @@ export default function ChatPage() {
 
     return (
         <div className="w-full flex items-center justify-center min-h-screen p-4">
-            <div className="flex flex-col h-[80vh] max-w-5xl mx-auto bg-[#F8F5FF] rounded-xl shadow-md overflow-hidden border border-gray-200">
+            <div
+                className="flex flex-col h-[80vh] w-full max-w-5xl mx-auto bg-[#F8F5FF] rounded-xl shadow-md overflow-hidden border border-gray-200">
                 {/* Header */}
                 <header className="p-6 bg-white">
                     <div className="max-w-4xl mx-auto">
@@ -127,19 +117,20 @@ export default function ChatPage() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2 bg-[#F3F0FF] px-3 py-1.5 rounded-full">
-                                    <Clock className="w-4 h-4 text-purple-600" />
-                                    <span className="text-sm font-medium text-purple-600">{formatTime(timeLeft)} remaining</span>
+                                    <Clock className="w-4 h-4 text-purple-600"/>
+                                    <span
+                                        className="text-sm font-medium text-purple-600">{formatTime(timeLeft)} remaining</span>
                                 </div>
                                 <Button
                                     variant="destructive"
-                                    className="bg-red-100 hover:bg-red-200 text-red-600 rounded-full"
+                                    className="bg-red-100 hover:bg-red-200 text-red-600 rounded-full cursor-pointer"
                                     onClick={() => setSessionEnded(true)}
                                 >
                                     End Session
                                 </Button>
                             </div>
                         </div>
-                        <Progress value={progress} className="h-2 bg-gray-100" />
+                        <Progress value={progress} className="h-2 bg-gray-100"/>
                     </div>
                 </header>
 
@@ -152,7 +143,8 @@ export default function ChatPage() {
                                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} items-end gap-2`}
                             >
                                 {message.role === "ai" && (
-                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <div
+                                        className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
                                         <span className="text-purple-600 text-lg">🤖</span>
                                     </div>
                                 )}
@@ -161,11 +153,17 @@ export default function ChatPage() {
                                         message.role === "user" ? "bg-[#F3F0FF] text-gray-800" : "bg-white shadow-sm text-gray-800"
                                     }`}
                                 >
-                                    {message.content}
+                                    {
+                                        message.role === "ai" ?
+                                            <Markdown>{message.content}</Markdown> :
+                                            <span>{message.content}</span>
+                                    }
                                 </div>
                                 {message.role === "user" && (
                                     <Avatar className="w-8 h-8">
-                                        <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="User" className="rounded-full" />
+                                        <img
+                                            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                                            alt="User" className="rounded-full"/>
                                     </Avatar>
                                 )}
                             </div>
@@ -176,7 +174,8 @@ export default function ChatPage() {
                                 <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center">
                                     <p className="font-medium">Session has ended</p>
                                     <p className="text-sm mt-1">Thank you for sharing.</p>
-                                    <Button variant="outline" className="mt-3" onClick={() => router.push("/dashboard")}>
+                                    <Button variant="outline" className="mt-3"
+                                            onClick={() => router.push("/dashboard")}>
                                         Return to Dashboard
                                     </Button>
                                 </div>
@@ -202,7 +201,7 @@ export default function ChatPage() {
                             className="bg-purple-600 hover:bg-purple-700 rounded-full px-6 text-white"
                         >
                             <span className="mr-2">Send</span>
-                            <Send className="w-4 h-4" />
+                            <Send className="w-4 h-4"/>
                         </Button>
                     </form>
                 </div>
