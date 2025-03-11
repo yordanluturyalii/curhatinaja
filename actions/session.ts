@@ -55,3 +55,29 @@ export default async function createSession(formData: FormData): Promise<Session
         return {error: e};
     }
 }
+
+type UpdateSessionResponse = {
+    data: {
+        id: number;
+    }
+}
+
+export async function updateSession(formData: FormData): Promise<UpdateSessionResponse> {
+    const sessionId = Number(formData.get("sessionId"))
+    const timeRemaining = Number(formData.get("timeRemaining"))
+    const ended = formData.get("ended") === "true"
+
+    const result = await db.update(sessions)
+        .set({
+            time_remaining: timeRemaining,
+            ended: ended,
+        })
+        .where(eq(sessions.id, sessionId))
+        .returning({id: sessions.id});
+
+    return {
+        data: {
+            id: result[0].id,
+        }
+    }
+}

@@ -9,8 +9,9 @@ import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Avatar} from "@/components/ui/avatar"
 import {Progress} from "@/components/ui/progress"
-import createChat from "@/actions/chat";
+import createChat, {getChats} from "@/actions/chat";
 import Markdown from "react-markdown";
+import {updateSession} from "@/actions/session";
 
 interface Message {
     id: string
@@ -23,9 +24,10 @@ export default function ChatPage() {
     const params = useParams()
     const searchParams = useSearchParams()
     const chatContainerRef = useRef<HTMLDivElement>(null)
-    const [timeLeft, setTimeLeft] = useState(300)
+    const [timeLeft, setTimeLeft] = useState<number | null>(null)
     const [sessionEnded, setSessionEnded] = useState(false)
     const [progress, setProgress] = useState(100)
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -46,17 +48,81 @@ export default function ChatPage() {
     }
 
     useEffect(() => {
-        if (timeLeft > 0 && !sessionEnded) {
+        const loadChatHistory = async () => {
+            // setIsLoading(true)
+            try {
+                const cachedTime = sessionStorage.getItem(`chat_time_${sessionId}`)
+                if (cachedTime) {
+                    const parsedTime = parseInt(cachedTime, 10)
+                    if (!isNaN(parsedTime)) {
+                        setTimeLeft(parsedTime)
+                        setProgress(Math.round((parsedTime / 300) * 100))
+                    }
+                }
+
+                const result = await getChats(Number(sessionId))
+                if (result.data) {
+                    const initialMessages: Message[] = [{
+                        id: "system-1",
+                        role: "ai",
+                        content: "Hai! Saya di sini untuk mengobrol dan membantumu curhat. Apa yang kamu rasakan hari ini?",
+                    }];
+
+                    if (result.data.message && result.data.message.length > 0) {
+                        const formattedMessages: Message[] = result.data.message.map((msg, index) => ({
+                            id: `${msg.role}-${index}`,
+                            role: msg.role as "user" | "ai",
+                            content: msg.message
+                        }))
+                        setMessages([...initialMessages, ...formattedMessages]);
+                    }
+
+                    if (result.data.session) {
+                        const {timeRemaining, ended} = result.data.session
+                        setTimeLeft(timeRemaining !== undefined ? timeRemaining : 300)
+                        setProgress(Math.round((timeRemaining / 300) * 100))
+                        setSessionEnded(ended || false)
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load chat history:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadChatHistory();
+    }, [sessionId]);
+
+    useEffect(() => {
+        if (timeLeft > 0 && !sessionEnded && !isLoading) {
             const timer = setTimeout(() => {
-                setTimeLeft(timeLeft - 1)
-                setProgress(Math.round(((timeLeft - 1) / 300) * 100))
-                console.log(progress);
+                const newTimeLeft = timeLeft - 1
+                setTimeLeft(newTimeLeft)
+                setProgress(Math.round((newTimeLeft / 300) * 100))
+
+                sessionStorage.setItem(`chat_time_${sessionId}`, newTimeLeft.toString())
+
+                saveSessionStatus(Number(sessionId), newTimeLeft, false)
             }, 1000)
             return () => clearTimeout(timer)
         } else if (timeLeft === 0 && !sessionEnded) {
             setSessionEnded(true)
+            saveSessionStatus(Number(sessionId), 0, true)
         }
-    }, [timeLeft, sessionEnded])
+    }, [timeLeft, sessionEnded, isLoading, sessionId])
+
+    const saveSessionStatus = async (sessionId: number, timeRemaining: number, ended: boolean) => {
+        try {
+            const formData = new FormData()
+            formData.append("sessionId", sessionId.toString())
+            formData.append("timeRemaining", timeRemaining.toString())
+            formData.append("ended", ended.toString())
+
+            await updateSession(formData)
+        } catch (error) {
+            console.error("Failed to save session status:", error)
+        }
+    }
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -99,6 +165,17 @@ export default function ChatPage() {
         }, 1000)
 
         setInput("")
+    }
+
+    if (isLoading) {
+        return (
+            <div className="w-full flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading chat session...</p>
+                </div>
+            </div>
+        )
     }
 
     return (

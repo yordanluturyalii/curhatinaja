@@ -2,7 +2,8 @@
 
 import {GoogleGenerativeAI} from "@google/generative-ai";
 import {db} from "@/db";
-import {messages} from "@/db/schema";
+import {messages, sessions} from "@/db/schema";
+import {eq} from "drizzle-orm";
 
 type ChatResponse = {
     error?: {};
@@ -61,5 +62,51 @@ export default async function createChat(formData: FormData): Promise<ChatRespon
     } catch (e) {
         console.error(e);
         return {error: e}
+    }
+}
+
+type GetChatResponse = {
+    error?: {};
+    data?: {
+        message: {
+            role: string,
+            message: string
+        }[],
+        session: {
+            time_remaining: number,
+            ended: boolean
+        }
+    }
+}
+
+export async function getChats(sessionId: number): Promise<GetChatResponse> {
+    try {
+        const message = await db.select({
+            role: messages.role,
+            message: messages.message
+        }).from(messages)
+            .where(eq(messages.session_id, sessionId))
+            .orderBy(messages.created_at);
+
+        const session = await db.select({
+            time_remaining: sessions.time_remaining,
+            ended: sessions.ended,
+        })
+            .from(sessions)
+            .where(eq(sessions.id, sessionId))
+            .limit(1)
+
+        return {
+            data: {
+                message: message,
+                session: {
+                    time_remaining: session[0].time_remaining,
+                    ended: session[0].ended,
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        return {error: e};
     }
 }
