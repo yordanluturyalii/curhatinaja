@@ -83,9 +83,6 @@ const Dashboard = () => {
             <NewChatModal
                 isOpen={isOpenModal}
                 onClose={() => setIsOpenModal(false)}
-                onStart={(settings) => {
-                    router.push(`/chat/new?personality=${settings.personality}&role=${settings.role}`)
-                }}
             />
         </main>
     )

@@ -1,11 +1,12 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import NextAuth from "next-auth"
+import NextAuth, {AuthOptions} from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt-ts";
+import type { NextAuthOptions } from "next-auth"
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -35,6 +36,8 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60
   }
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST }

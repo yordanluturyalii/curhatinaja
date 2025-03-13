@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import {boolean, integer, pgEnum, pgTable, text, timestamp, varchar} from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum('role', ['user', 'ai']);
 export const sentimentEnum = pgEnum('sentiment', ['positive', 'neutral', 'negative']);
@@ -15,7 +15,10 @@ export const users = pgTable("users", {
 export const sessions = pgTable("sessions", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     user_id: integer().references(() => users.id, {onDelete: 'cascade'}).notNull(),
-    created_ad: timestamp()
+    title: varchar({ length: 255 }),
+    time_remaining: integer().default(300),
+    ended: boolean().default(false),
+    created_at: timestamp().notNull().defaultNow()
 });
 
 export const messages = pgTable("messages", {
@@ -23,7 +26,7 @@ export const messages = pgTable("messages", {
     session_id: integer().references(() => sessions.id, {onDelete: "cascade"}).notNull(),
     role: roleEnum().notNull(),
     message: text().notNull(),
-    created_at: timestamp()
+    created_at: timestamp().notNull().defaultNow()
 });
 
 export const results = pgTable('results', {
