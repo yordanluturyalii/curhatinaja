@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import {useState, useEffect, useRef, useActionState} from "react"
+import {useState, useEffect, useRef} from "react"
 import {useParams, useRouter, useSearchParams} from "next/navigation"
 import {Send, Clock} from "lucide-react"
 import {Button} from "@/components/ui/button"
@@ -28,6 +28,7 @@ export default function ChatPage() {
     const [sessionEnded, setSessionEnded] = useState(false)
     const [progress, setProgress] = useState(100)
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [submitting, setSubmitting] = useState<boolean>(false);
 
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -49,7 +50,6 @@ export default function ChatPage() {
 
     useEffect(() => {
         const loadChatHistory = async () => {
-            // setIsLoading(true)
             try {
                 const cachedTime = sessionStorage.getItem(`chat_time_${sessionId}`)
                 if (cachedTime) {
@@ -80,7 +80,7 @@ export default function ChatPage() {
                     if (result.data.session) {
                         const {timeRemaining, ended} = result.data.session
                         setTimeLeft(timeRemaining !== undefined ? timeRemaining : 300)
-                        setProgress(Math.round((timeRemaining / 300) * 100))
+                        setProgress(Math.round(((timeRemaining || 300) / 300) * 100))
                         setSessionEnded(ended || false)
                     }
                 }
@@ -90,11 +90,12 @@ export default function ChatPage() {
                 setIsLoading(false)
             }
         }
+
         loadChatHistory();
     }, [sessionId]);
 
     useEffect(() => {
-        if (timeLeft > 0 && !sessionEnded && !isLoading) {
+        if (timeLeft && timeLeft > 0 && !sessionEnded && !isLoading) {
             const timer = setTimeout(() => {
                 const newTimeLeft = timeLeft - 1
                 setTimeLeft(newTimeLeft)
@@ -102,7 +103,9 @@ export default function ChatPage() {
 
                 sessionStorage.setItem(`chat_time_${sessionId}`, newTimeLeft.toString())
 
-                saveSessionStatus(Number(sessionId), newTimeLeft, false)
+                if (newTimeLeft % 10 === 0 || newTimeLeft <= 10) {
+                    saveSessionStatus(Number(sessionId), newTimeLeft, false)
+                }
             }, 1000)
             return () => clearTimeout(timer)
         } else if (timeLeft === 0 && !sessionEnded) {
@@ -130,7 +133,8 @@ export default function ChatPage() {
         }
     }, [messages])
 
-    const formatTime = (seconds: number) => {
+    const formatTime = (seconds: number | null) => {
+        if (seconds === null) return "5:00"
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
         return `${mins}:${secs < 10 ? "0" : ""}${secs}`
@@ -138,33 +142,42 @@ export default function ChatPage() {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if (sessionEnded || !input.trim()) return
+        if (submitting || sessionEnded || !input.trim()) return
 
-        const newUserMessage: Message = {
-            id: `user-${messages.length + 1}`,
-            role: "user",
-            content: input,
+        setSubmitting(true)
+
+        try {
+            const newUserMessage: Message = {
+                id: `user-${messages.length + 1}`,
+                role: "user",
+                content: input,
+            }
+
+            setMessages(prev => [...prev, newUserMessage])
+
+            const formData = new FormData();
+            formData.append("message", input);
+            formData.append("role", role);
+            formData.append("personality", personality);
+            formData.append("sessionId", sessionId.toString());
+
+            setInput("")
+
+            const result = await createChat(formData);
+
+            if (result.data?.message) {
+                const newAiMessage: Message = {
+                    id: `ai-${messages.length + 2}`,
+                    role: "ai",
+                    content: result.data.message,
+                }
+                setMessages(prev => [...prev, newAiMessage])
+            }
+        } catch (error) {
+            console.error("Failed to send message:", error)
+        } finally {
+            setSubmitting(false)
         }
-        setMessages([...messages, newUserMessage])
-        const formData = new FormData();
-
-        formData.append("message", input);
-        formData.append("role", role);
-        formData.append("personality", personality);
-        formData.append("sessionId", sessionId);
-        const result = await createChat(formData);
-
-        const newAiMessage: Message = {
-            id: `ai-${messages.length + 2}`,
-            role: "ai",
-            content: result.data?.message,
-        }
-
-        setTimeout(() => {
-            setMessages((prevMessages) => [...prevMessages, newAiMessage])
-        }, 1000)
-
-        setInput("")
     }
 
     if (isLoading) {
@@ -201,7 +214,10 @@ export default function ChatPage() {
                                 <Button
                                     variant="destructive"
                                     className="bg-red-100 hover:bg-red-200 text-red-600 rounded-full cursor-pointer"
-                                    onClick={() => setSessionEnded(true)}
+                                    onClick={() => {
+                                        setSessionEnded(true)
+                                        saveSessionStatus(Number(sessionId), 0, true)
+                                    }}
                                 >
                                     End Session
                                 </Button>
@@ -268,17 +284,23 @@ export default function ChatPage() {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder={sessionEnded ? "Session has ended" : "Type your message..."}
-                            disabled={sessionEnded}
+                            disabled={sessionEnded || submitting}
                             name={"message"}
                             className="flex-1 bg-[#F3F0FF] border-0 rounded-full text-gray-800 placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-purple-500 focus-visible:ring-offset-0"
                         />
                         <Button
                             type="submit"
-                            disabled={sessionEnded || !input.trim()}
+                            disabled={sessionEnded || submitting || !input.trim()}
                             className="bg-purple-600 hover:bg-purple-700 rounded-full px-6 text-white"
                         >
-                            <span className="mr-2">Send</span>
-                            <Send className="w-4 h-4"/>
+                            {submitting ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            ) : (
+                                <>
+                                    <span className="mr-2">Send</span>
+                                    <Send className="w-4 h-4"/>
+                                </>
+                            )}
                         </Button>
                     </form>
                 </div>
@@ -286,4 +308,3 @@ export default function ChatPage() {
         </div>
     )
 }
-
