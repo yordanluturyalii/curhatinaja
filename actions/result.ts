@@ -90,7 +90,6 @@ export async function createResult(sessionId: number): Promise<CreateResultRespo
             generationConfig,
         });
         const responseText = (await result.response).text();
-        console.log(responseText);
 
         const parsedText = JSON.parse(responseText);
 
