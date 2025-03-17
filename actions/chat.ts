@@ -31,7 +31,7 @@ const storeMemory = async (userId: number, text: string) => {
     console.log("Successfully Saved Memory To Pinecone");
 }
 
-const getMemory = async (userId: number, text: string) => {
+const getMemory = async (userId: number, sessionId: number, text: string) => {
     const model = genAI.getGenerativeModel({model: "embedding-001"});
     const result = model.embedContent(text);
     const embedding = (await result).embedding.values;
@@ -72,7 +72,7 @@ export default async function createChat(formData: FormData): Promise<ChatRespon
         };
         const user = await db.select().from(users).where(eq(users.email, auth.user.email)).limit(1);
 
-        const pastMemories = await getMemory(user[0].id, message);
+        const pastMemories = await getMemory(user[0].id, Number(sessionId), message);
         const memoryText = pastMemories.length > 0 ? `Berikut percakapan sebelumnya:\n${pastMemories.join("\n")}\n` : "Tidak ada percakapan sebelumnya.";
 
         const history = memoryText

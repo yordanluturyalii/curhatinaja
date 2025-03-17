@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import {boolean, integer, pgEnum, pgTable, text, timestamp, varchar} from "drizzle-orm/pg-core";
+import {boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, varchar} from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum('role', ['user', 'ai']);
 export const sentimentEnum = pgEnum('sentiment', ['positive', 'neutral', 'negative']);
@@ -33,7 +33,9 @@ export const results = pgTable('results', {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     session_id: integer().references(() => sessions.id, {onDelete: 'cascade'}).notNull(),
     sentiment: sentimentEnum().notNull(),
-    summary: text().notNull()
+    summary: text().notNull(),
+    suggestion: jsonb(),
+    mood: jsonb()
 });
 
 

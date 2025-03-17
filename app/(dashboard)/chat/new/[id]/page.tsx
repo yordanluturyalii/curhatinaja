@@ -214,16 +214,17 @@ export default function ChatPage() {
                                 <Button
                                     variant="destructive"
                                     className="bg-red-100 hover:bg-red-200 text-red-600 rounded-full cursor-pointer"
-                                    onClick={() => {
+                                    onClick={async () => {
                                         setSessionEnded(true)
-                                        saveSessionStatus(Number(sessionId), 0, true)
+                                        await saveSessionStatus(Number(sessionId), 0, true)
+                                        router.push(`/chat/result/${Number(sessionId)}`)
                                     }}
                                 >
                                     End Session
                                 </Button>
                             </div>
                         </div>
-                        <Progress value={progress} className="h-2 bg-gray-100"/>
+                        <Progress value={progress} bgProgress={"bg-purple-600"}/>
                     </div>
                 </header>
 
