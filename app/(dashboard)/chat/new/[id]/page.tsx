@@ -12,6 +12,7 @@ import {Progress} from "@/components/ui/progress"
 import createChat, {getChats} from "@/actions/chat";
 import Markdown from "react-markdown";
 import {updateSession} from "@/actions/session";
+import Image from "next/image";
 
 interface Message {
     id: string
@@ -256,7 +257,7 @@ export default function ChatPage() {
                                 </div>
                                 {message.role === "user" && (
                                     <Avatar className="w-8 h-8">
-                                        <img
+                                        <Image
                                             src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
                                             alt="User" className="rounded-full"/>
                                     </Avatar>
