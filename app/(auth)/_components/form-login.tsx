@@ -93,7 +93,7 @@ const FormLogin = () => {
 
             <div className="mt-3 text-center">
                 <p className="text-sm text-gray-600">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link href="/register" className="text-purple-700 font-medium hover:underline">
                         Register
                     </Link>

@@ -24,7 +24,6 @@ type Session = {
 
 const Dashboard = () => {
     const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
-    const router = useRouter();
     const [data, setData] = useState<Session | undefined>(undefined);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
