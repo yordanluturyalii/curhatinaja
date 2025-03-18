@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import NextAuth, {AuthOptions} from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt-ts";
-import type { NextAuthOptions } from "next-auth"
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -14,7 +13,7 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "email", placeholder: "Enter your email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials.password) throw new Error("Please enter an email and password");
         const user = await db.select().from(users).where(eq(users.email, credentials.email)).limit(1);
 

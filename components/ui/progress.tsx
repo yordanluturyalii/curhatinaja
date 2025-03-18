@@ -5,10 +5,6 @@ import * as ProgressPrimitive from "@radix-ui/react-progress"
 
 import {cn} from "@/lib/utils"
 
-interface ProgressProps {
-    bgProgress?: string
-}
-
 function Progress({
                       className,
                       value,

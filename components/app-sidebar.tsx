@@ -1,6 +1,5 @@
 "use client"
 
-import {useState} from "react"
 import {
     Sidebar,
     SidebarContent,
@@ -27,7 +26,6 @@ import {DoorClosed, Home, MessageCircle, Settings} from "lucide-react"
 import Link from "next/link"
 import {usePathname} from "next/navigation"
 import {cn} from "@/lib/utils"
-import {Separator} from "@/components/ui/separator"
 import {signOut} from "next-auth/react";
 
 const menus = [
@@ -45,7 +43,6 @@ const menus = [
 
 const AppSidebar = () => {
     const pathname = usePathname()
-    const [isOpen, setIsOpen] = useState<boolean>(false)
 
     return (
         <Sidebar collapsible="icon" className="border-gray-300 bg-sidebar-gradient">

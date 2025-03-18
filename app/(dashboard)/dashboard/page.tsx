@@ -2,9 +2,8 @@
 
 import NewChatModal from '@/app/(dashboard)/_components/new-chat-modal';
 import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Card, CardHeader, CardTitle} from '@/components/ui/card';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {useRouter} from 'next/navigation';
 import React, {useEffect, useState} from 'react'
 import VentCard from "@/app/(dashboard)/_components/vent-card";
 import {getSessions} from "@/actions/session";

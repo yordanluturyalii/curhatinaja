@@ -17,7 +17,7 @@ type ResultResponse = {
         loving: number
     }
     summary: string
-    suggestions: any[]
+    suggestions: string[]
     title: string
 }
 
