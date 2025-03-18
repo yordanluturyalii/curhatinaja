@@ -22,7 +22,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "./ui/alert-dialog"
-import {DoorClosed, Home, MessageCircle, Settings} from "lucide-react"
+import {DoorClosed, History, Home, MessageCircle, Settings} from "lucide-react"
 import Link from "next/link"
 import {usePathname} from "next/navigation"
 import {cn} from "@/lib/utils"
@@ -33,6 +33,11 @@ const menus = [
         title: "Dashboard",
         url: "/dashboard",
         icon: Home,
+    },
+    {
+        title: "History",
+        url: "/history",
+        icon: History,
     },
     {
         title: "Setting",
