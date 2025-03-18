@@ -3,7 +3,6 @@
 import NewChatModal from '@/app/(dashboard)/_components/new-chat-modal';
 import {Button} from '@/components/ui/button';
 import {Card, CardHeader, CardTitle} from '@/components/ui/card';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import React, {useEffect, useState} from 'react'
 import VentCard from "@/app/(dashboard)/_components/vent-card";
 import {getSessions} from "@/actions/session";
@@ -95,45 +94,25 @@ const Dashboard = () => {
                 </Button>
             </div>
 
-            <Tabs defaultValue="recent" className="space-y-6 mt-5">
-                <TabsList className="bg-white border border-gray-200 p-1 rounded-full">
-                    <TabsTrigger
-                        value="recent"
-                        className="rounded-full px-6 data-[state=active]:bg-purple-800 data-[state=active]:text-white"
-                    >
-                        Curhat Terbaru
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="favorites"
-                        className="rounded-full px-6 data-[state=active]:bg-purple-800 data-[state=active]:text-white"
-                    >
-                        Favorit
-                    </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="recent" className="space-y-6">
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {data?.data && data.data.length > 0 ? (
-                            data.data.map((chat) => (
-                                <VentCard
-                                    key={chat.id}
-                                    id={chat.id}
-                                    title={chat.title}
-                                    date={typeof chat.date === 'string' ? chat.date : formatDate(chat.date as Date)}
-                                    personality={chat.personality}
-                                    roles={chat.role}
-                                />
-                            ))
-                        ) : (
-                            <div className="col-span-3 text-center py-12 text-gray-500">Belum ada sesi curhat</div>
-                        )}
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="favorites">
-                    <div className="text-center py-12 text-gray-500">Belum ada curhat yang difavoritkan</div>
-                </TabsContent>
-            </Tabs>
+            <div className="mt-5">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900">Curhat Terbaru</h2>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {data?.data && data.data.length > 0 ? (
+                        data.data.map((chat) => (
+                            <VentCard
+                                key={chat.id}
+                                id={chat.id}
+                                title={chat.title}
+                                date={typeof chat.date === 'string' ? chat.date : formatDate(chat.date as Date)}
+                                personality={chat.personality}
+                                roles={chat.role}
+                            />
+                        ))
+                    ) : (
+                        <div className="col-span-3 text-center py-12 text-gray-500">Belum ada sesi curhat</div>
+                    )}
+                </div>
+            </div>
 
             <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-6 text-gray-900">Statistik Curhat</h2>
