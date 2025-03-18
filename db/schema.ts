@@ -3,6 +3,8 @@ import {boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, varchar} from
 
 export const roleEnum = pgEnum('role', ['user', 'ai']);
 export const sentimentEnum = pgEnum('sentiment', ['positive', 'neutral', 'negative']);
+export const personalityEnum = pgEnum('personality', ['santai', 'humoris', 'serius', 'bijak']);
+export const actEnum = pgEnum('act', ['teman', 'psikolog', 'motivator', 'mentor', 'pacar'])
 
 export const users = pgTable("users", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -16,6 +18,8 @@ export const sessions = pgTable("sessions", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     user_id: integer().references(() => users.id, {onDelete: 'cascade'}).notNull(),
     title: varchar({ length: 255 }),
+    act: actEnum().notNull(),
+    personality: personalityEnum().notNull(),
     time_remaining: integer().default(300),
     ended: boolean().default(false),
     created_at: timestamp().notNull().defaultNow()

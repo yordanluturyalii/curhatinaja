@@ -13,12 +13,12 @@ interface VentCardProps {
     roles: string;
 }
 
-const VentCard = ({key, id, title, date, personality, roles} : VentCardProps) => {
+const VentCard = ({id, title, date, personality, roles} : VentCardProps) => {
     const router = useRouter();
 
     return (
         <Card
-            key={key}
+            key={id}
             className="bg-white border-gray-200 rounded-2xl hover:shadow-lg transition-shadow"
         >
             <CardHeader className="pb-2">
@@ -33,7 +33,7 @@ const VentCard = ({key, id, title, date, personality, roles} : VentCardProps) =>
                 <Button
                     variant="default"
                     className="w-full mt-4 bg-purple-700 transition cursor-pointer text-white hover:bg-purple-600"
-                    onClick={() => router.push(`/chat/${id}`)}
+                    onClick={() => router.push(`/chat/result/${id}`)}
                 >
                     Lihat Detail
                 </Button>

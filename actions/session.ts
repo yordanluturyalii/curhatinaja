@@ -2,7 +2,7 @@
 
 import {db} from "@/db";
 import {sessions, users} from "@/db/schema";
-import {eq} from "drizzle-orm";
+import {and, count, desc, eq, gte} from "drizzle-orm";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/app/api/auth/[...nextauth]/route";
 
@@ -33,6 +33,8 @@ export default async function createSession(formData: FormData): Promise<Session
             try {
                 const result = await tx.insert(sessions).values({
                     user_id: user[0].id,
+                    act: role as any,
+                    personality: personality as any
                 }).returning({id: sessions.id});
                 id = result[0].id;
             } catch (txError) {
@@ -79,5 +81,59 @@ export async function updateSession(formData: FormData): Promise<UpdateSessionRe
         data: {
             id: result[0].id,
         }
+    }
+}
+
+type GetSessionResponse = {
+    data: {
+        id: number;
+        title: string;
+        date: string;
+        role: string;
+        personality: string;
+    }[],
+    total: number;
+    totalThisMonth: number;
+    favoritePersonality: number;
+}
+
+export async function getSessions(): Promise<GetSessionResponse> {
+    const session = await getServerSession(authOptions)
+    if (!session) throw Error("Unauthorized");
+
+    const user = await db.select().from(users).where(eq(users.email, session.user.email));
+    if (!user) throw Error("Unauthorized");
+
+    const chatSessions = await db.select().from(sessions).where(eq(sessions.user_id, user[0].id)).limit(3);
+    const totalSession = await db.$count(sessions, eq(sessions.user_id, user[0].id));
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const totalThisMonth = await db.$count(sessions, and(eq(sessions.user_id, user[0].id), gte(sessions.created_at, startOfMonth)));
+
+    const personalityCounts = await db.select({
+        personality: sessions.personality,
+        count: count()
+    })
+        .from(sessions)
+        .where(eq(sessions.user_id, user[0].id))
+        .groupBy(sessions.personality)
+        .orderBy(desc(count()));
+
+    const favoritePersonality = personalityCounts.length > 0 ? personalityCounts[0].personality : null;
+
+    const sessionData = chatSessions.map(session => ({
+        id: session.id,
+        title: session.title,
+        date: session.created_at,
+        role: session.act,
+        personality: session.personality
+    }));
+
+    return {
+        data: sessionData,
+        total: totalSession,
+        totalThisMonth: totalThisMonth,
+        favoritePersonality: favoritePersonality,
     }
 }

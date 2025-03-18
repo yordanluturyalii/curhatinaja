@@ -111,6 +111,7 @@ export default function ChatPage() {
         } else if (timeLeft === 0 && !sessionEnded) {
             setSessionEnded(true)
             saveSessionStatus(Number(sessionId), 0, true)
+            router.push(`/chat/result/${Number(sessionId)}`)
         }
     }, [timeLeft, sessionEnded, isLoading, sessionId])
 
